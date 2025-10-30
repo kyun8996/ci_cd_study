@@ -1,4 +1,4 @@
-# Slack 알림 워크플로우
+# 💬 Slack 알림 전송 워크플로우
 name: Notify to Slack
 
 on:
@@ -7,73 +7,16 @@ on:
   pull_request:
 
 jobs:
-  build:
+  notify:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # package.json이 있을 때만 실행
-      - name: Install and Test
-        if: hashFiles('**/package.json') != ''
-        run: |
-          npm ci --prefer-offline --no-audit --fund=false
-          npm test --if-present
-
-      # 성공 시 알림
-      - name: Notify success to Slack
-        if: ${{ success() }}
+      - name: Send message to Slack
         uses: slackapi/slack-github-action@v2
         with:
           payload: |
             {
-              "text": ":white_check_mark: 빌드 성공",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*${{ github.repository }}* `${{ github.ref_name }}` 브랜치 빌드 성공"
-                  }
-                },
-                {
-                  "type": "context",
-                  "elements": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "워크플로우: ${{ github.workflow }} • 실행: #${{ github.run_number }}"
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      # 실패 시 알림
-      - name: Notify failure to Slack
-        if: ${{ failure() }}
-        uses: slackapi/slack-github-action@v2
-        with:
-          payload: |
-            {
-              "text": ":x: ${{ github.repository }} 빌드 실패 (`${{ github.ref_name }}` 브랜치)",
-              "attachments": [
-                {
-                  "color": "#D32F2F",
-                  "fields": [
-                    { "title": "작업", "value": "${{ github.job }}", "short": true },
-                    { "title": "러너", "value": "${{ runner.os }}", "short": true }
-                  ],
-                  "footer": "에러 확인: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                }
-              ]
+              "text": "📢 새 커밋이 main 브랜치에 push 되었습니다! (`${{ github.repository }}`)"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
