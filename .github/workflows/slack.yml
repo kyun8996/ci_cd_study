@@ -14,9 +14,10 @@ jobs:
       - name: Send message to Slack
         uses: slackapi/slack-github-action@v2
         with:
+          webhook-type: incoming-webhook
           payload: |
             {
-              "text": "📢 새 커밋이 main 브랜치에 push 되었습니다! (`${{ github.repository }}`)"
+              "text": "📢 `${{ github.repository }}` main 브랜치에 새로운 커밋이 푸시되었습니다!"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
